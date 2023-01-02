@@ -11,13 +11,15 @@ global YEAR;
 global SIM_TIME;
 global PRICE_ELETRICITY;
 global TOTAL_LAMPS;
+global FIRST_LAMPS;
 
-RATE            = 0.0;
+RATE            = 0.05;
 
 DISCRETE_TIME   = 100;
-TOTAL_CYCLES    = 1200+1;
+YEAR            = ((14 + 2 + 3)*2)*5*12;
+TOTAL_YEARS     = 30;
+TOTAL_CYCLES    = fix(YEAR*TOTAL_YEARS/DISCRETE_TIME) + 1;
 END             = DISCRETE_TIME*(TOTAL_CYCLES - 1);
-YEAR            = 250*12;
 SIM_TIME        = 0:DISCRETE_TIME:END;
 PRICE_ELETRICITY= 0.239*10^(-3);
 
@@ -25,6 +27,7 @@ PRICE_ELETRICITY= 0.239*10^(-3);
 LAMP = load_lamps(TOTAL_CYCLES, DISCRETE_TIME);
 
 TOTAL_LAMPS = sum(LAMP(1).Count(1,:));
+FIRST_LAMPS = LAMP(1).Count(1,:);
 %% Life Simulation
 % For each lamp
 for c=2:size(LAMP,2)
@@ -35,8 +38,9 @@ for c=2:size(LAMP,2)
         [LAMP(1).Count, LAMP(c).Scenarios(d).Count] = ...
             t0Replacement(LAMP(1).Count, LAMP(c).Scenarios(d).Count,...
                                          LAMP(c).Scenarios(d).Replacement);
-        LAMP(c).Scenarios(d).CountEletricity(1)     = 0;
-        
+        LAMP(c).Scenarios(d).CountEletricity(1)     = DISCRETE_TIME *...
+               (sum(LAMP(1).Count(1,:))*LAMP(1).Watts+...
+                sum(LAMP(c).Scenarios(d).Count(1,:))*LAMP(c).Watts);
         % For each time step after t0
         for e=2:TOTAL_CYCLES
             
@@ -244,7 +248,6 @@ for c=2:size(LAMP,2)
     title(['Cumulative money spent: ' LAMP(c).Name]);
     legend(LEGEND{1:d});
 end
-
 %% Comparative total plots
 for d=1:size(LAMP(3).Scenarios,2)
     figure()
@@ -265,7 +268,7 @@ for d=1:size(LAMP(3).Scenarios,2)
     end
     % Plot things
     grid on;
-    title(['Cumulative money spent: ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%']);
+    title(['NPV at r_i = ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%']);
     legend(LEGEND{1:c-1});
 end
 
@@ -278,9 +281,9 @@ end
 function [STATE_1, STATE_2] = t0Replacement(LAMP_1, LAMP_2, REPLACEMENT)
 
     global TOTAL_LAMPS;
+    global FIRST_LAMPS;
     % Resets first lamps
-    LAMP_1(1,:) = LAMP_1(1,:)*0;
-    LAMP_1(1,1) = TOTAL_LAMPS;
+    LAMP_1(1,:) = FIRST_LAMPS;
     % total lamps to replace
     LAMP_2(1,1) = TOTAL_LAMPS*REPLACEMENT;
     % replacement of the ones already broken

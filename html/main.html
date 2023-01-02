@@ -1,0 +1,684 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>main</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-01-02"><meta name="DC.source" content="main.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Script for NPV value of lamps</a></li><li><a href="#2">Global variables</a></li><li><a href="#3">Loading of lamps</a></li><li><a href="#4">Life Simulation</a></li><li><a href="#5">Accounting of new lamps</a></li><li><a href="#6">Accounting of eletricity</a></li><li><a href="#7">Plots</a></li><li><a href="#8">Lamp Plots</a></li><li><a href="#9">Eletricity Plots</a></li><li><a href="#10">Total Plots</a></li><li><a href="#11">Comparative total plots</a></li><li><a href="#12">Functions</a></li><li><a href="#13">T_0 replacement</a></li><li><a href="#14">Sum with interest</a></li></ul></div><h2 id="1">Script for NPV value of lamps</h2><pre class="codeinput">clear <span class="string">all</span>;
+close <span class="string">all</span>;
+</pre><h2 id="2">Global variables</h2><pre class="codeinput"><span class="keyword">global</span> DISCRETE_TIME;
+<span class="keyword">global</span> TOTAL_CYCLES;
+<span class="keyword">global</span> END;
+<span class="keyword">global</span> YEAR;
+<span class="keyword">global</span> SIM_TIME;
+<span class="keyword">global</span> PRICE_ELETRICITY;
+<span class="keyword">global</span> TOTAL_LAMPS;
+<span class="keyword">global</span> FIRST_LAMPS;
+
+RATE            = 0.05;
+
+DISCRETE_TIME   = 100;
+YEAR            = ((14 + 2 + 3)*2)*5*12;
+TOTAL_YEARS     = 30;
+TOTAL_CYCLES    = fix(YEAR*TOTAL_YEARS/DISCRETE_TIME) + 1;
+END             = DISCRETE_TIME*(TOTAL_CYCLES - 1);
+SIM_TIME        = 0:DISCRETE_TIME:END;
+PRICE_ELETRICITY= 0.239*10^(-3);
+</pre><h2 id="3">Loading of lamps</h2><pre class="codeinput">LAMP = load_lamps(TOTAL_CYCLES, DISCRETE_TIME);
+
+TOTAL_LAMPS = sum(LAMP(1).Count(1,:));
+FIRST_LAMPS = LAMP(1).Count(1,:);
+</pre><h2 id="4">Life Simulation</h2><p>For each lamp</p><pre class="codeinput"><span class="keyword">for</span> c=2:size(LAMP,2)
+    <span class="comment">% For each scenario</span>
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+
+        <span class="comment">% For the start</span>
+        [LAMP(1).Count, LAMP(c).Scenarios(d).Count] = <span class="keyword">...</span>
+            t0Replacement(LAMP(1).Count, LAMP(c).Scenarios(d).Count,<span class="keyword">...</span>
+                                         LAMP(c).Scenarios(d).Replacement);
+        LAMP(c).Scenarios(d).CountEletricity(1)     = DISCRETE_TIME *<span class="keyword">...</span>
+               (sum(LAMP(1).Count(1,:))*LAMP(1).Watts+<span class="keyword">...</span>
+                sum(LAMP(c).Scenarios(d).Count(1,:))*LAMP(c).Watts);
+        <span class="comment">% For each time step after t0</span>
+        <span class="keyword">for</span> e=2:TOTAL_CYCLES
+
+            <span class="comment">% ORIGINAL LAMPS</span>
+                <span class="comment">% Checks each one from last to second</span>
+            <span class="keyword">for</span> f_v =0:size(LAMP(1).Count,2)-2
+                f   =  size(LAMP(1).Count,2)-f_v;
+                <span class="comment">% passes the good lamps to the next section in time</span>
+                LAMP(1).Count(e,f) = <span class="keyword">...</span>
+                    LAMP(1).Count(e-1,f-1)*(1 - LAMP(1).ProbRateExp(f));
+            <span class="keyword">end</span>
+            <span class="comment">% first &lt;- there is no replacement for the original lamps</span>
+            LAMP(1).Count(e,1) = 0;
+
+            <span class="comment">% NEW LAMPS</span>
+                <span class="comment">% Checks each one from last to second</span>
+            <span class="keyword">for</span> f_v=0:size(LAMP(c).Scenarios(d).Count,2)-2
+                f  =  size(LAMP(c).Scenarios(d).Count,2) - f_v;
+                <span class="comment">% passes the good lamps to the next section in time</span>
+                LAMP(c).Scenarios(d).Count(e,f) = <span class="keyword">...</span>
+                    LAMP(c).Scenarios(d).Count(e-1,f-1)* <span class="keyword">...</span>
+                    (1 - LAMP(c).ProbRateExp(f));
+            <span class="keyword">end</span>
+            <span class="comment">% first &lt;- replacement to maintain the lamps in the system</span>
+            LAMP(c).Scenarios(d).Count(e,1) = <span class="keyword">...</span>
+                TOTAL_LAMPS - (sum(LAMP(1).Count(e,:)) +<span class="keyword">...</span>
+                               sum(LAMP(c).Scenarios(d).Count(e,:)));
+
+            <span class="comment">% eletricity spent</span>
+            LAMP(c).Scenarios(d).CountEletricity(e,1) = DISCRETE_TIME *<span class="keyword">...</span>
+               (sum(LAMP(1).Count(e-1,:))*LAMP(1).Watts               +<span class="keyword">...</span>
+                sum(LAMP(c).Scenarios(d).Count(e-1,:))*LAMP(c).Watts) ;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="5">Accounting of new lamps</h2><pre class="codeinput"><span class="keyword">for</span> c=2:size(LAMP,2)
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        <span class="comment">% New Lamps</span>
+        [LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+         LAMP(c).Scenarios(d).YearLamps]	= <span class="keyword">...</span>
+            yearly_lamps(LAMP(c).Scenarios(d));
+        <span class="comment">% Sum of new lamps</span>
+        LAMP(c).Scenarios(d).YearLampsSum   = <span class="keyword">...</span>
+            specialSum(LAMP(c).Scenarios(d).YearLamps,0);
+        <span class="comment">% In money</span>
+        LAMP(c).Scenarios(d).MoneyLamps     = <span class="keyword">...</span>
+            -LAMP(c).Scenarios(d).YearLamps*LAMP(c).Price;
+        <span class="comment">% Sum of money</span>
+        LAMP(c).Scenarios(d).MoneyLampsSum  = <span class="keyword">...</span>
+            specialSum(LAMP(c).Scenarios(d).MoneyLamps,RATE);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="6">Accounting of eletricity</h2><pre class="codeinput"><span class="keyword">for</span> c=2:size(LAMP,2)
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        <span class="comment">% Eletricity</span>
+     	[~,LAMP(c).Scenarios(d).YearEletricity] = <span class="keyword">...</span>
+            yearly_eletricity(LAMP(c).Scenarios(d));
+        <span class="comment">% Sum of eletricity</span>
+        LAMP(c).Scenarios(d).YearEletricitySum  = <span class="keyword">...</span>
+            specialSum(LAMP(c).Scenarios(d).YearEletricity,0);
+        <span class="comment">% In money</span>
+        LAMP(c).Scenarios(d).MoneyEletricity    = <span class="keyword">...</span>
+            -LAMP(c).Scenarios(d).YearEletricity*PRICE_ELETRICITY;
+        <span class="comment">% Sum of money</span>
+        LAMP(c).Scenarios(d).MoneyEletricitySum = <span class="keyword">...</span>
+            specialSum(LAMP(c).Scenarios(d).MoneyEletricity,RATE);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="7">Plots</h2><p>All the plots</p><h2 id="8">Lamp Plots</h2><p>Sum of the new lamps per year</p><pre class="codeinput"><span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    grid <span class="string">on</span>;
+    title([<span class="string">'New lamps per year: '</span> LAMP(c).Name]);
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).YearLamps,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% Total of the new lamps until year</span>
+<span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).YearLampsSum,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{d} = [<span class="string">'r_0 = '</span><span class="keyword">...</span>
+                     num2str(LAMP(c).Scenarios(d).Replacement*100)<span class="keyword">...</span>
+                     <span class="string">'%'</span>];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'Cumulative lamps: '</span> LAMP(c).Name]);
+    legend(LEGEND{1:d});
+<span class="keyword">end</span>
+<span class="comment">% Total of the money spent in lamps until year</span>
+<span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyLampsSum,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{d} = [<span class="string">'r_0 = '</span><span class="keyword">...</span>
+             num2str(LAMP(c).Scenarios(d).Replacement*100)<span class="keyword">...</span>
+             <span class="string">'%'</span>];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'Cumulative money spent on lamps: '</span> LAMP(c).Name]);
+    legend(LEGEND{1:d});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="main_01.png" alt=""> <img vspace="5" hspace="5" src="main_02.png" alt=""> <img vspace="5" hspace="5" src="main_03.png" alt=""> <img vspace="5" hspace="5" src="main_04.png" alt=""> <img vspace="5" hspace="5" src="main_05.png" alt=""> <img vspace="5" hspace="5" src="main_06.png" alt=""> <img vspace="5" hspace="5" src="main_07.png" alt=""> <img vspace="5" hspace="5" src="main_08.png" alt=""> <img vspace="5" hspace="5" src="main_09.png" alt=""> <h2 id="9">Eletricity Plots</h2><p>Sum of the eletricity per year</p><pre class="codeinput"><span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    grid <span class="string">on</span>;
+    title([<span class="string">'Eletricity per year: '</span> LAMP(c).Name]);
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).YearEletricity,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% Total of the new lamps until year</span>
+<span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).YearEletricitySum,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{d} = [<span class="string">'r_0 = '</span><span class="keyword">...</span>
+                     num2str(LAMP(c).Scenarios(d).Replacement*100)<span class="keyword">...</span>
+                     <span class="string">'%'</span>];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'Cumulative eletricity used: '</span> LAMP(c).Name]);
+    legend(LEGEND{1:d});
+<span class="keyword">end</span>
+<span class="comment">% Total of the money spent in lamps until year</span>
+<span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyEletricitySum,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{d} = [<span class="string">'r_0 = '</span><span class="keyword">...</span>
+             num2str(LAMP(c).Scenarios(d).Replacement*100)<span class="keyword">...</span>
+             <span class="string">'%'</span>];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'Cumulative money spent on eletricity: '</span> LAMP(c).Name]);
+    legend(LEGEND{1:d});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="main_10.png" alt=""> <img vspace="5" hspace="5" src="main_11.png" alt=""> <img vspace="5" hspace="5" src="main_12.png" alt=""> <img vspace="5" hspace="5" src="main_13.png" alt=""> <img vspace="5" hspace="5" src="main_14.png" alt=""> <img vspace="5" hspace="5" src="main_15.png" alt=""> <img vspace="5" hspace="5" src="main_16.png" alt=""> <img vspace="5" hspace="5" src="main_17.png" alt=""> <img vspace="5" hspace="5" src="main_18.png" alt=""> <h2 id="10">Total Plots</h2><p>Total of money spent per year</p><pre class="codeinput"><span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyEletricity + <span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyLamps,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{d} = [<span class="string">'r_0 = '</span><span class="keyword">...</span>
+             num2str(LAMP(c).Scenarios(d).Replacement*100)<span class="keyword">...</span>
+             <span class="string">'%'</span>];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'Money spent: '</span> LAMP(c).Name]);
+    legend(LEGEND{1:d});
+<span class="keyword">end</span>
+<span class="comment">% Total of money until year</span>
+<span class="keyword">for</span> c=2:size(LAMP,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="keyword">for</span> d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyEletricitySum + <span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyLampsSum,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{d} = [<span class="string">'r_0 = '</span><span class="keyword">...</span>
+             num2str(LAMP(c).Scenarios(d).Replacement*100)<span class="keyword">...</span>
+             <span class="string">'%'</span>];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'Cumulative money spent: '</span> LAMP(c).Name]);
+    legend(LEGEND{1:d});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="main_19.png" alt=""> <img vspace="5" hspace="5" src="main_20.png" alt=""> <img vspace="5" hspace="5" src="main_21.png" alt=""> <img vspace="5" hspace="5" src="main_22.png" alt=""> <img vspace="5" hspace="5" src="main_23.png" alt=""> <img vspace="5" hspace="5" src="main_24.png" alt=""> <h2 id="11">Comparative total plots</h2><pre class="codeinput"><span class="keyword">for</span> d=1:size(LAMP(3).Scenarios,2)
+    figure()
+    hold <span class="string">on</span>;
+    <span class="comment">% First lamps are for comparison</span>
+    plot(LAMP(2).Scenarios(1).YearTime,<span class="keyword">...</span>
+             zeros(size(LAMP(2).Scenarios(1).YearTime)),<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+    LEGEND{1} = [LAMP(2).Name];
+    <span class="keyword">for</span> c=3:size(LAMP,2)
+        plot(LAMP(c).Scenarios(d).YearTime,<span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyEletricitySum + <span class="keyword">...</span>
+             LAMP(c).Scenarios(d).MoneyLampsSum - <span class="keyword">...</span>
+             LAMP(2).Scenarios(1).MoneyEletricitySum - <span class="keyword">...</span>
+             LAMP(2).Scenarios(1).MoneyLampsSum,<span class="keyword">...</span>
+            <span class="string">'Marker'</span>, <span class="string">"*"</span>);
+        LEGEND{c-1} = [LAMP(c).Name];
+    <span class="keyword">end</span>
+    <span class="comment">% Plot things</span>
+    grid <span class="string">on</span>;
+    title([<span class="string">'NPV at r_i = '</span> num2str(LAMP(c).Scenarios(d).Replacement*100) <span class="string">'%'</span>]);
+    legend(LEGEND{1:c-1});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="main_25.png" alt=""> <img vspace="5" hspace="5" src="main_26.png" alt=""> <img vspace="5" hspace="5" src="main_27.png" alt=""> <h2 id="12">Functions</h2><h2 id="13">T_0 replacement</h2><pre class="codeinput"><span class="keyword">function</span> [STATE_1, STATE_2] = t0Replacement(LAMP_1, LAMP_2, REPLACEMENT)
+
+    <span class="keyword">global</span> TOTAL_LAMPS;
+    <span class="keyword">global</span> FIRST_LAMPS;
+    <span class="comment">% Resets first lamps</span>
+    LAMP_1(1,:) = FIRST_LAMPS;
+    <span class="comment">% total lamps to replace</span>
+    LAMP_2(1,1) = TOTAL_LAMPS*REPLACEMENT;
+    <span class="comment">% replacement of the ones already broken</span>
+    <span class="keyword">if</span>(LAMP_1(1,1) &gt; LAMP_2(1,1))
+     	LAMP_1(1,1) = LAMP_1(1,1) - LAMP_2(1,1);
+    <span class="comment">% replacement of the functioning ones</span>
+    <span class="keyword">else</span>
+        counter = LAMP_1(1,1);
+        LAMP_1(1,1) = 0;
+        <span class="keyword">for</span> f_v=0:size(LAMP_1,2)-2
+            <span class="comment">% from last to second</span>
+            f = size(LAMP_1,2) - f_v;
+            <span class="keyword">if</span> LAMP_1(1,f) &gt; LAMP_2 - counter
+                LAMP_1(1,f) = LAMP_1(1,f) - (LAMP_2(1,1) - counter);
+                <span class="keyword">break</span>
+            <span class="keyword">else</span>
+                counter = counter + LAMP_1(1,f);
+                LAMP_1(1,f) = 0;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    STATE_1 = LAMP_1;
+    STATE_2 = LAMP_2;
+<span class="keyword">end</span>
+</pre><h2 id="14">Sum with interest</h2><pre class="codeinput"><span class="keyword">function</span> SUM = specialSum(x, r)
+
+SUM = x;
+
+<span class="keyword">for</span> c=2:size(x,1)
+    SUM(c) = SUM(c-1) + x(c)/(1+r)^(c-1);
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Script for NPV value of lamps
+
+clear all;
+close all;
+
+%% Global variables
+global DISCRETE_TIME;
+global TOTAL_CYCLES;
+global END;
+global YEAR;
+global SIM_TIME;
+global PRICE_ELETRICITY;
+global TOTAL_LAMPS;
+global FIRST_LAMPS;
+
+RATE            = 0.05;
+
+DISCRETE_TIME   = 100;
+YEAR            = ((14 + 2 + 3)*2)*5*12;
+TOTAL_YEARS     = 30;
+TOTAL_CYCLES    = fix(YEAR*TOTAL_YEARS/DISCRETE_TIME) + 1;
+END             = DISCRETE_TIME*(TOTAL_CYCLES - 1);
+SIM_TIME        = 0:DISCRETE_TIME:END;
+PRICE_ELETRICITY= 0.239*10^(-3);
+
+%% Loading of lamps
+LAMP = load_lamps(TOTAL_CYCLES, DISCRETE_TIME);
+
+TOTAL_LAMPS = sum(LAMP(1).Count(1,:));
+FIRST_LAMPS = LAMP(1).Count(1,:);
+%% Life Simulation
+% For each lamp
+for c=2:size(LAMP,2)
+    % For each scenario
+    for d=1:size(LAMP(c).Scenarios,2)
+        
+        % For the start
+        [LAMP(1).Count, LAMP(c).Scenarios(d).Count] = ...
+            t0Replacement(LAMP(1).Count, LAMP(c).Scenarios(d).Count,...
+                                         LAMP(c).Scenarios(d).Replacement);
+        LAMP(c).Scenarios(d).CountEletricity(1)     = DISCRETE_TIME *...
+               (sum(LAMP(1).Count(1,:))*LAMP(1).Watts+...
+                sum(LAMP(c).Scenarios(d).Count(1,:))*LAMP(c).Watts);
+        % For each time step after t0
+        for e=2:TOTAL_CYCLES
+            
+            % ORIGINAL LAMPS
+                % Checks each one from last to second
+            for f_v =0:size(LAMP(1).Count,2)-2
+                f   =  size(LAMP(1).Count,2)-f_v;
+                % passes the good lamps to the next section in time
+                LAMP(1).Count(e,f) = ...
+                    LAMP(1).Count(e-1,f-1)*(1 - LAMP(1).ProbRateExp(f));
+            end
+            % first <- there is no replacement for the original lamps
+            LAMP(1).Count(e,1) = 0;
+            
+            % NEW LAMPS
+                % Checks each one from last to second
+            for f_v=0:size(LAMP(c).Scenarios(d).Count,2)-2
+                f  =  size(LAMP(c).Scenarios(d).Count,2) - f_v;
+                % passes the good lamps to the next section in time
+                LAMP(c).Scenarios(d).Count(e,f) = ...
+                    LAMP(c).Scenarios(d).Count(e-1,f-1)* ...
+                    (1 - LAMP(c).ProbRateExp(f));
+            end
+            % first <- replacement to maintain the lamps in the system
+            LAMP(c).Scenarios(d).Count(e,1) = ...
+                TOTAL_LAMPS - (sum(LAMP(1).Count(e,:)) +...
+                               sum(LAMP(c).Scenarios(d).Count(e,:)));
+                           
+            % eletricity spent
+            LAMP(c).Scenarios(d).CountEletricity(e,1) = DISCRETE_TIME *...
+               (sum(LAMP(1).Count(e-1,:))*LAMP(1).Watts               +...
+                sum(LAMP(c).Scenarios(d).Count(e-1,:))*LAMP(c).Watts) ;
+        end
+    end
+end
+
+%% Accounting of new lamps
+for c=2:size(LAMP,2)
+    for d=1:size(LAMP(c).Scenarios,2)
+        % New Lamps
+        [LAMP(c).Scenarios(d).YearTime,...
+         LAMP(c).Scenarios(d).YearLamps]	= ...
+            yearly_lamps(LAMP(c).Scenarios(d));
+        % Sum of new lamps
+        LAMP(c).Scenarios(d).YearLampsSum   = ...
+            specialSum(LAMP(c).Scenarios(d).YearLamps,0);
+        % In money
+        LAMP(c).Scenarios(d).MoneyLamps     = ...
+            -LAMP(c).Scenarios(d).YearLamps*LAMP(c).Price;
+        % Sum of money
+        LAMP(c).Scenarios(d).MoneyLampsSum  = ...
+            specialSum(LAMP(c).Scenarios(d).MoneyLamps,RATE);
+    end
+end
+
+%% Accounting of eletricity
+for c=2:size(LAMP,2)
+    for d=1:size(LAMP(c).Scenarios,2)
+        % Eletricity
+     	[~,LAMP(c).Scenarios(d).YearEletricity] = ...
+            yearly_eletricity(LAMP(c).Scenarios(d));
+        % Sum of eletricity
+        LAMP(c).Scenarios(d).YearEletricitySum  = ...
+            specialSum(LAMP(c).Scenarios(d).YearEletricity,0);
+        % In money
+        LAMP(c).Scenarios(d).MoneyEletricity    = ...
+            -LAMP(c).Scenarios(d).YearEletricity*PRICE_ELETRICITY;
+        % Sum of money
+        LAMP(c).Scenarios(d).MoneyEletricitySum = ...
+            specialSum(LAMP(c).Scenarios(d).MoneyEletricity,RATE);
+    end
+end
+%% Plots
+%
+% All the plots
+%
+%% Lamp Plots
+% Sum of the new lamps per year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    grid on;
+    title(['New lamps per year: ' LAMP(c).Name]);
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearLamps,...
+            'Marker', "*");
+    end
+end
+% Total of the new lamps until year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearLampsSum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+                     num2str(LAMP(c).Scenarios(d).Replacement*100)...
+                     '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative lamps: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+% Total of the money spent in lamps until year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyLampsSum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative money spent on lamps: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+%% Eletricity Plots
+% Sum of the eletricity per year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    grid on;
+    title(['Eletricity per year: ' LAMP(c).Name]);
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearEletricity,...
+            'Marker', "*");
+    end
+end
+% Total of the new lamps until year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearEletricitySum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+                     num2str(LAMP(c).Scenarios(d).Replacement*100)...
+                     '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative eletricity used: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+% Total of the money spent in lamps until year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricitySum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative money spent on eletricity: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+%% Total Plots
+% Total of money spent per year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricity + ...
+             LAMP(c).Scenarios(d).MoneyLamps,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Money spent: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+% Total of money until year
+for c=2:size(LAMP,2)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricitySum + ...
+             LAMP(c).Scenarios(d).MoneyLampsSum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative money spent: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+%% Comparative total plots
+for d=1:size(LAMP(3).Scenarios,2)
+    figure()
+    hold on;
+    % First lamps are for comparison
+    plot(LAMP(2).Scenarios(1).YearTime,...
+             zeros(size(LAMP(2).Scenarios(1).YearTime)),...
+            'Marker', "*");
+    LEGEND{1} = [LAMP(2).Name];
+    for c=3:size(LAMP,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricitySum + ...
+             LAMP(c).Scenarios(d).MoneyLampsSum - ...
+             LAMP(2).Scenarios(1).MoneyEletricitySum - ...
+             LAMP(2).Scenarios(1).MoneyLampsSum,...
+            'Marker', "*");
+        LEGEND{c-1} = [LAMP(c).Name];
+    end
+    % Plot things
+    grid on;
+    title(['NPV at r_i = ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%']);
+    legend(LEGEND{1:c-1});
+end
+
+%% Functions
+%
+%
+%
+%
+%% T_0 replacement
+function [STATE_1, STATE_2] = t0Replacement(LAMP_1, LAMP_2, REPLACEMENT)
+
+    global TOTAL_LAMPS;
+    global FIRST_LAMPS;
+    % Resets first lamps
+    LAMP_1(1,:) = FIRST_LAMPS;
+    % total lamps to replace
+    LAMP_2(1,1) = TOTAL_LAMPS*REPLACEMENT;
+    % replacement of the ones already broken
+    if(LAMP_1(1,1) > LAMP_2(1,1))
+     	LAMP_1(1,1) = LAMP_1(1,1) - LAMP_2(1,1);
+    % replacement of the functioning ones
+    else
+        counter = LAMP_1(1,1);
+        LAMP_1(1,1) = 0;
+        for f_v=0:size(LAMP_1,2)-2
+            % from last to second
+            f = size(LAMP_1,2) - f_v;
+            if LAMP_1(1,f) > LAMP_2 - counter
+                LAMP_1(1,f) = LAMP_1(1,f) - (LAMP_2(1,1) - counter);
+                break
+            else
+                counter = counter + LAMP_1(1,f);
+                LAMP_1(1,f) = 0;
+            end
+        end
+    end
+    
+    STATE_1 = LAMP_1;
+    STATE_2 = LAMP_2;
+end
+
+%% Sum with interest
+function SUM = specialSum(x, r)
+
+SUM = x;
+
+for c=2:size(x,1)
+    SUM(c) = SUM(c-1) + x(c)/(1+r)^(c-1);
+end
+
+end
+##### SOURCE END #####
+--></body></html>
