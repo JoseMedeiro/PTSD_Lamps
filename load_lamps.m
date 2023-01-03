@@ -38,7 +38,7 @@ LAMP(c).Name                            = 'FL';
 LAMP(c).TimeRated                       = [0  ; 2; 4; 6; 8;12;15;16;20]*10^3;
 LAMP(c).SurvivalRateRated               = [100;99;99;99;99;89;50;33; 0]*10^(-2);
 LAMP(c).Price                           = 10.49;
-LAMP(c).Watts                           = 19;
+LAMP(c).Watts                           = 17.1;
 
 [LAMP(c).TimeExp, LAMP(c).ProbRateExp]  = interpolate_values(...
                                             LAMP(c).TimeRated,...
@@ -50,13 +50,13 @@ for d=1:size(LAMP(c).Scenarios,2)
     LAMP(c).Scenarios(d).Count = zeros(TOTAL_CYCLES,...
                                     LAMP(c).TimeRated(end)/DISCRETE_TIME+1);
 end
-% LAMP 3 - LED A
+%% LAMP 3 - LED A
 c = 3;
 LAMP(c).Name                            = 'LED A';
 LAMP(c).TimeRated                       = [0  ; 2;18;20;25;30;36;36.1]*10^3;
 LAMP(c).SurvivalRateRated               = [100;99;99;98;90;62;30;   0]*10^(-2);
 LAMP(c).Price                           = 13.58;
-LAMP(c).Watts                           = 18;
+LAMP(c).Watts                           = 19;
 
 [LAMP(c).TimeExp, LAMP(c).ProbRateExp]  = interpolate_values(...
                                             LAMP(c).TimeRated,...
@@ -71,7 +71,6 @@ for d=1:size(LAMP(c).Scenarios,2)
     LAMP(c).Scenarios(d).Count = zeros(TOTAL_CYCLES,...
                                     LAMP(c).TimeRated(end)/DISCRETE_TIME+1);
 end
-
 
 %% LAMP 4 - LED B
 c = 4;

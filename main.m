@@ -16,7 +16,7 @@ global FIRST_LAMPS;
 RATE            = 0.05;
 
 DISCRETE_TIME   = 100;
-YEAR            = ((14 + 2 + 3)*2)*5*12;
+YEAR            = ((14 + 2 + 4)*2)*5*12;
 TOTAL_YEARS     = 30;
 TOTAL_CYCLES    = fix(YEAR*TOTAL_YEARS/DISCRETE_TIME) + 1;
 END             = DISCRETE_TIME*(TOTAL_CYCLES - 1);
@@ -117,6 +117,16 @@ end
 %
 % All the plots
 %
+
+% Colors & Markers
+COLORS_STRING = ["#000000","#076785","#3F762B";...
+                 "#000000","#0989B1","#549E39";...
+                 "#000000","#46CCF6","#93D07D"];
+
+MARKER_STRING = [" ";...
+                 "*";...
+                 "."];
+
 %% Lamp Plots
 % Sum of the new lamps per year
 for c=2:size(LAMP,2)
@@ -271,7 +281,42 @@ for d=1:size(LAMP(3).Scenarios,2)
     title(['NPV at r_i = ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%']);
     legend(LEGEND{1:c-1});
 end
-
+%% Condensed plots
+%
+LAMPS_PLOT = [2, 3;...
+              3, 4;...
+              4, 2];
+          
+for b =1:size(LAMPS_PLOT,2)
+    figure()
+    hold on;
+    n = 1;
+    for c_=1:size(LAMPS_PLOT,1)
+        c = LAMPS_PLOT(c_,b);
+        % First lamps are for comparison
+        for d=1:size(LAMP(c).Scenarios,2)
+            p(n)    = plot(LAMP(c).Scenarios(d).YearTime,...
+                           LAMP(c).Scenarios(d).MoneyEletricitySum + ...
+                           LAMP(c).Scenarios(d).MoneyLampsSum - ...
+                           LAMP(2).Scenarios(1).MoneyEletricitySum - ...
+                           LAMP(2).Scenarios(1).MoneyLampsSum);
+            if(MARKER_STRING(c-1) ~= " ")
+                p(n).Marker = MARKER_STRING(c-1);
+            end
+            p(n).Color = COLORS_STRING(d,c-1);
+            LEGEND{n} = [LAMP(c).Name ', r_0 = ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%'];
+            n = n+1;
+        end
+    end
+    % Plot things
+    grid on;
+    xlabel('Years');
+    ylabel('NPV [€]');
+    title('With W_{FL} = 19W');
+    legend(LEGEND{1:n-1},'Location'     , 'eastoutside' ,...
+                         'NumColumns'   , 3             ,...
+                         'Orientation'  , 'horizontal');
+end
 %% Functions
 %
 %
