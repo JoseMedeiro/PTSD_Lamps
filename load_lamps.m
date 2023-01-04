@@ -5,7 +5,8 @@
 %   Name: for plot reasons;
 %   Time Rated: for the survival rate and failure probability;
 %   Survival Rate Rated: for the survival rate and failure probability;
-%   Substitution Scenario: for the removal of (firstly) existing lamps.
+%   Substitution Scenario: for the removal of (firstly) existing lamps;
+%   Start: to know the size of the system of initial lamps.
 %
 %% Notes
 %

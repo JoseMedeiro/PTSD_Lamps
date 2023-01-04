@@ -1,6 +1,7 @@
 %% All Plots
 %
-% This function does the plots in a compartimentalized (and more clean) way
+% This function does the plots in a compartimentalized (and more clean)
+% way.
 %
 %%
 function all_plots(LAMP, setup)
