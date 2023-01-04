@@ -1,0 +1,312 @@
+%% Script for NPV value of lamps
+
+clear all;
+close all;
+
+%% Global variables
+global DISCRETE_TIME;
+global TOTAL_CYCLES;
+global END;
+global YEAR;
+global SIM_TIME;
+global PRICE_ELETRICITY;
+global TOTAL_LAMPS;
+global FIRST_LAMPS;
+
+RATE            = 0.05;
+
+DISCRETE_TIME   = 100;
+YEAR            = ((14 + 2 + 4)*2)*5*12;
+TOTAL_YEARS     = 30;
+TOTAL_CYCLES    = fix(YEAR*TOTAL_YEARS/DISCRETE_TIME) + 1;
+END             = DISCRETE_TIME*(TOTAL_CYCLES - 1);
+SIM_TIME        = 0:DISCRETE_TIME:END;
+PRICE_ELETRICITY= 0.239*10^(-3);
+
+%% Loading of lamps
+%
+% In here the lamps are loaded 
+%
+disp('Starting Loading')
+LAMP = load_lamps(TOTAL_CYCLES, DISCRETE_TIME);
+
+TOTAL_LAMPS = sum(LAMP(1).Count(1,:));
+FIRST_LAMPS = LAMP(1).Count(1,:);
+disp([num2str(length(LAMP)) 'Loaded'])
+disp('Ending Loading')
+%% Life Simulation
+% 
+% See 'sims_eletro.m' for more details. But basically it does the life
+% simulation for all of the lamps.
+%
+disp('Starting Simulations')
+% For each lamp
+for c=2:length(LAMP)
+    disp(['Simulating ' LAMP(c).Name])
+    % For each scenario
+    for d=1:length(LAMP(c).Scenarios)
+        disp(['           Replacement '...
+              num2str(LAMP(c).Scenarios(d).Replacement*100) '%'])
+        LAMP = sims_eletro(LAMP,c,d);
+    end
+end
+disp('Ending Simulations')
+%% Accounting
+%
+% Groups the discrete-acting-as-continuos in the spaces we so call 'years',
+% aka, specified time intervals in which to aggregate the data collected.
+%
+disp('Starting Accounting')
+%% Accounting of new lamps
+for c=2:length(LAMP)
+    for d=1:length(LAMP(c).Scenarios)
+        % New Lamps
+        [LAMP(c).Scenarios(d).YearTime,...
+         LAMP(c).Scenarios(d).YearLamps]	= ...
+            yearly_lamps(LAMP(c).Scenarios(d));
+        % Sum of new lamps
+        LAMP(c).Scenarios(d).YearLampsSum   = ...
+            specialSum(LAMP(c).Scenarios(d).YearLamps,0);
+        % In money
+        LAMP(c).Scenarios(d).MoneyLamps     = ...
+            -LAMP(c).Scenarios(d).YearLamps*LAMP(c).Price;
+        % Sum of money
+        LAMP(c).Scenarios(d).MoneyLampsSum  = ...
+            specialSum(LAMP(c).Scenarios(d).MoneyLamps,RATE);
+    end
+end
+%% Accounting of eletricity
+for c=2:length(LAMP)
+    for d=1:length(LAMP(c).Scenarios)
+        % Eletricity
+     	[~,LAMP(c).Scenarios(d).YearEletricity] = ...
+            yearly_eletricity(LAMP(c).Scenarios(d));
+        % Sum of eletricity
+        LAMP(c).Scenarios(d).YearEletricitySum  = ...
+            specialSum(LAMP(c).Scenarios(d).YearEletricity,0);
+        % In money
+        LAMP(c).Scenarios(d).MoneyEletricity    = ...
+            -LAMP(c).Scenarios(d).YearEletricity*PRICE_ELETRICITY;
+        % Sum of money
+        LAMP(c).Scenarios(d).MoneyEletricitySum = ...
+            specialSum(LAMP(c).Scenarios(d).MoneyEletricity,RATE);
+    end
+end
+disp('Ending Accounting')
+%% Plots
+%
+% Seems a little obvious, and it is. This is the part where the plots for
+% the data are made.
+%
+disp('Starting Plots')
+% Colors & Markers
+COLORS_STRING = ["#000000","#076785","#3F762B";...
+                 "#000000","#0989B1","#549E39";...
+                 "#000000","#46CCF6","#93D07D"];
+
+MARKER_STRING = [" ";...
+                 "*";...
+                 "."];
+
+%% Lamp Plots
+% Sum of the new lamps per year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    grid on;
+    title(['New lamps per year: ' LAMP(c).Name]);
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearLamps,...
+            'Marker', "*");
+    end
+end
+% Total of the new lamps until year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearLampsSum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+                     num2str(LAMP(c).Scenarios(d).Replacement*100)...
+                     '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative lamps: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+% Total of the money spent in lamps until year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyLampsSum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative money spent on lamps: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+%% Eletricity Plots
+% Sum of the eletricity per year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    grid on;
+    title(['Eletricity per year: ' LAMP(c).Name]);
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearEletricity,...
+            'Marker', "*");
+    end
+end
+% Total of the new lamps until year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).YearEletricitySum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+                     num2str(LAMP(c).Scenarios(d).Replacement*100)...
+                     '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative eletricity used: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+% Total of the money spent in lamps until year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricitySum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative money spent on eletricity: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+%% Total Plots
+% Total of money spent per year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricity + ...
+             LAMP(c).Scenarios(d).MoneyLamps,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Money spent: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+% Total of money until year
+for c=2:size(LAMP,1)
+    figure()
+    hold on;
+    for d=1:size(LAMP(c).Scenarios,2)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricitySum + ...
+             LAMP(c).Scenarios(d).MoneyLampsSum,...
+            'Marker', "*");
+        LEGEND{d} = ['r_0 = '...
+             num2str(LAMP(c).Scenarios(d).Replacement*100)...
+             '%'];
+    end
+    % Plot things
+    grid on;
+    title(['Cumulative money spent: ' LAMP(c).Name]);
+    legend(LEGEND{1:d});
+end
+%% Comparative total plots
+for d=1:size(LAMP(3).Scenarios,2)
+    figure()
+    hold on;
+    % First lamps are for comparison
+    plot(LAMP(2).Scenarios(1).YearTime,...
+             zeros(size(LAMP(2).Scenarios(1).YearTime)),...
+            'Marker', "*");
+    LEGEND{1} = [LAMP(2).Name];
+    for c=3:size(LAMP,1)
+        plot(LAMP(c).Scenarios(d).YearTime,...
+             LAMP(c).Scenarios(d).MoneyEletricitySum + ...
+             LAMP(c).Scenarios(d).MoneyLampsSum - ...
+             LAMP(2).Scenarios(1).MoneyEletricitySum - ...
+             LAMP(2).Scenarios(1).MoneyLampsSum,...
+            'Marker', "*");
+        LEGEND{c-1} = [LAMP(c).Name];
+    end
+    % Plot things
+    grid on;
+    title(['NPV at r_i = ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%']);
+    legend(LEGEND{1:c-1});
+end
+%% Condensed plots
+%
+LAMPS_PLOT = [2;...
+              3;...
+              4];
+          
+for b =1:size(LAMPS_PLOT,2)
+    figure()
+    hold on;
+    n = 1;
+    for c_=1:length(LAMPS_PLOT)
+        c = LAMPS_PLOT(c_,b);
+        % First lamps are for comparison
+        for d=1:length(LAMP(c).Scenarios)
+            p(n)    = plot(LAMP(c).Scenarios(d).YearTime,...
+                           LAMP(c).Scenarios(d).MoneyEletricitySum + ...
+                           LAMP(c).Scenarios(d).MoneyLampsSum - ...
+                           LAMP(2).Scenarios(1).MoneyEletricitySum - ...
+                           LAMP(2).Scenarios(1).MoneyLampsSum);
+            if(MARKER_STRING(c-1) ~= " ")
+                p(n).Marker = MARKER_STRING(c-1);
+            end
+            p(n).Color = COLORS_STRING(d,c-1);
+            LEGEND{n} = [LAMP(c).Name ', r_0 = ' num2str(LAMP(c).Scenarios(d).Replacement*100) '%'];
+            n = n+1;
+        end
+    end
+    % Plot things
+    grid on;
+    xlabel('Years');
+    ylabel('NPV [€]');
+    title(['With W_{FL} = ' num2str(LAMP(1).Watts) ' W']);
+    legend(LEGEND{1:n-1},'Location'     , 'southoutside' ,...
+                         'NumColumns'   , 3             ,...
+                         'Orientation'  , 'horizontal');
+end
+%% Functions
+%
+%% Sum with interest
+function SUM = specialSum(x, r)
+
+SUM = x;
+
+for c=2:size(x,1)
+    SUM(c) = SUM(c-1) + x(c)/(1+r)^(c-1);
+end
+
+end

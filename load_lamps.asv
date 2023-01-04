@@ -14,16 +14,13 @@
 % substitution is 100%
 %
 %% Function
-function LAMP = load_lamps(fileName)
+function LAMP = load_lamps(TOTAL_CYCLES, DISCRETE_TIME)
 
-global TOTAL_CYCLES;
-global DISCRETE_TIME;
-
-data = jsondecode(fileread(fileName));
+data = jsondecode(fileread('Lamps_1.json'));
 
 LAMP = data.Lamps_data;
 
-for c=1:length(LAMP)
+for c=1:size(LAMP,1)
     
     % Corrects the values in the .JSON
     LAMP(c).TimeRated           = LAMP(c).TimeRated*1000;
@@ -35,23 +32,17 @@ for c=1:length(LAMP)
                                             DISCRETE_TIME);
     % Creating a matriz for the lamps in different stages for different
     % times, in the different Scenarios
-    for d=1:length(LAMP(c).Scenarios)
-        LAMP(c).Scenarios(d).Replacement    = LAMP(c).Scenarios(d)...
-                                              .Replacement/100;
-        LAMP(c).Scenarios(d).Count          = zeros(TOTAL_CYCLES,...
+    for d=1:size(LAMP(c).Scenarios,1)
+            LAMP(c).Scenarios(d).Count = zeros(TOTAL_CYCLES,...
                                                LAMP(c).TimeRated(end)/...
                                                DISCRETE_TIME+1);
     end
     % Creates an equilibrium for the default lamps
     if(~isempty(LAMP(c).Start))
-        LAMP(c).Count       = zeros(TOTAL_CYCLES,...
-                                    LAMP(c).TimeRated(end)/...
-                                    DISCRETE_TIME+1);
         LAMP(c).Count(1,:)  = equilibrium_lamps(LAMP(c));
     end
     
 end
-
 end
 %% Functions
 

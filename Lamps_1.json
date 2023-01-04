@@ -1,0 +1,52 @@
+{ "Lamps_data" :[
+	{ 	"Name":"Default",
+		"TimeRated":		[0  , 2, 4, 6, 8,12,15,16,20],
+		"SurvivalRateRated":[100,99,99,99,99,89,50,33, 0],
+		"Price":0,
+		"Watts":19,
+		"Start":3600,
+		"Scenarios": []
+	},
+	{ 	"Name":"FL",
+		"TimeRated":		[0  , 2, 4, 6, 8,12,15,16,20],
+		"SurvivalRateRated":[100,99,99,99,99,89,50,33, 0],
+		"Price":10.49,
+		"Watts":19,
+		"Start":[],
+		"Scenarios":[
+			{"Replacement":0
+			}
+		]
+	},
+	{ 	"Name":"LED A",
+		"TimeRated":		[0  , 2,18,20,25,30,36,36.1],
+		"SurvivalRateRated":[100,99,99,98,90,62,30,   0],
+		"Price":13.58,
+		"Watts":18,
+		"Start":[],
+		"Scenarios":[
+			{"Replacement":0
+			},
+			{"Replacement":50
+			},
+			{"Replacement":100
+			}
+		]
+	},
+	{ 	"Name":"LED B",
+		"TimeRated":		[0  ,40,56,60,65,70,80,88,88.1],
+		"SurvivalRateRated":[100,95,92,89,80,70,40,20,0   ],
+		"Price":20.99,
+		"Watts":12.5,
+		"Start":[],
+		"Scenarios":[
+			{"Replacement":0
+			},
+			{"Replacement":50
+			},
+			{"Replacement":100
+			}
+		]
+	}
+]
+}
